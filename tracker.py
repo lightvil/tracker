@@ -1,91 +1,177 @@
+import asyncio
 import cv2
 import numpy as np
-import asyncio
+import serial
+import types
 from threading import Thread, Event
 
-LEFT_IMAGE, RIGHT_IMAGE = None, None
-STOP_CAPTURE_EVENT = None
 
+class TrackerCamera:
+    __ENCODE_PARAM = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
-def init_camera():
-    video_capture_left = cv2.VideoCapture(0)
-    video_capture_right = cv2.VideoCapture(1)
-    return video_capture_left, video_capture_right
+    __PWM_X = 32
+    __PWM_Z = 35
 
+    __CAMERA_LEFT = 0
+    __CAMERA_RIGHT = 1
+    __LEFT = 'left'
+    __RIGHT = 'right'
+    __AXIS_X = 'x'
+    __AXIS_Z = 'z'
 
-def release_camera(video_capture_left, video_capture_right):
-    video_capture_left.release()
-    video_capture_right.release()
+    def __init__(self):
+        self.__capture_thread_event = None
+        self.__capture_thread = None
+        self.__sources = {
+            self.__LEFT: None,
+            self.__RIGHT: None
+        }
+        self.__images = {
+            self.__LEFT: None,
+            self.__RIGHT: None
+        }
+        self.__angles = {
+            self.__LEFT: 0,
+            self.__RIGHT: 0
+        }
+        self.serial_port = None
 
-
-async def capture_async(video_capture, encode_param):
-    ret, frame = video_capture.read()
-    result, frame = cv2.imencode('.jpg', frame, encode_param)
-    return np.array(frame).tobytes()
-
-
-def generate_capture(video_capture_left, video_capture_right):
-    global STOP_CAPTURE_EVENT
-    STOP_CAPTURE_EVENT = Event()
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
-    loop = asyncio.new_event_loop()
-    while True:
-        if STOP_CAPTURE_EVENT.isSet():
-            break
-        left_blob, right_blob = loop.run_until_complete(
-            asyncio.gather(
-                        capture_async(video_capture_left, encode_param),
-                        capture_async(video_capture_right, encode_param)
-                    )
+    def init_serial(self):
+        self.serial_port = serial.Serial(
+            port="/dev/ttyTHS1",
+            baudrate=9600,
+            bytesize=serial.EIGHTBITS,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
         )
-        yield left_blob, right_blob
-    loop.close()
+
+    def release_serial(self):
+        self.serial_port.close()
+
+    def init_video(self):
+        self.__sources[self.__LEFT] = cv2.VideoCapture(0)
+        self.__sources[self.__RIGHT] = cv2.VideoCapture(1)
+
+    def release_video(self):
+        if self.__sources[self.__LEFT] is not None:
+            self.__sources[self.__LEFT].release()
+        if self.__sources[self.__RIGHT] is not None:
+            self.__sources[self.__RIGHT].release()
+
+    def release(self):
+        self.release_video()
+        self.release_serial()
+
+    #
+    #
+    #
+    def rotate_to(self, axis, angle):
+        if axis == 'x' or axis == 'z':
+            self.serial_port.write(axis + str(angle))
+
+    def process_serial_input(self):
+        __result = []
+        __line = self.serial_port.readLine()
+        __axis = None
+        __angle = 0
+        for c in __line:
+            if c == 'X' or c == 'Z':
+                if __axis is not None:
+                    __result.append((__axis, __angle))
+                __axis = c
+                __angle = 0
+                continue
+            if __axis is not None:
+                if c.isdigit():
+                    __angle = __angle * 10 + ord(c) - ord('0')
+                else:
+                    if c != 'X' or c != 'Z':
+                        if __axis is not None:
+                            __result.append((__axis, __angle))
+                        __axis = None
+                        __angle = 0
+                    else:
+                        if __axis is not None:
+                            __result.append((__axis, __angle))
+                        __axis = c
+                        __angle = 0
+        for axis, angle in __result:
+            self.__angles[axis] = angle
+            # TODO FIRE ANGEL CHANGED EVENT HERE
+
+    #
+    # VIDEO CAPTURE
+    #
+    async def __capture_video(self, video_capture):
+        ret, frame = video_capture.read()
+        result, frame = cv2.imencode('.jpg', frame, self.__ENCODE_PARAM)
+        return np.array(frame).tobytes()
+
+    async def __do_capture(self):
+        __result = await asyncio.gather(
+            self.__capture_video(self.__sources[self.__LEFT]),
+            self.__capture_video(self.__sources[self.__RIGHT])
+        )
+        return __result
+
+    def __capture_thread_main(self):
+        self.init_video()
+        __loop = asyncio.new_event_loop()
+        __count = 0
+        while True:
+            if self.__capture_thread_event is not None and self.__capture_thread_event.isSet():
+                break
+            self.process_serial_input()
+            capture_result = __loop.run_until_complete(self.__do_capture())
+            __count = __count + 1
+            # TODO
+            #  UPDATE IMAGE AND FIRE EVENT
+            self.__images[self.__LEFT] = capture_result[0]
+            self.__images[self.__RIGHT] = capture_result[1]
+            print("ITERATION: " + str(__count))
+            print(capture_result)
+            if __count > 3:
+                self.stop_capture()
+        __loop.close()
+
+    def start_capture(self):
+        self.__capture_thread_event = Event()
+        self.__capture_thread = Thread(target=self.__capture_thread_main, )
+        self.__capture_thread.start()
+
+    def stop_capture(self):
+        self.__capture_thread_event.set()
+
+    def wait_for_capture_thread(self):
+        self.__capture_thread.join()
+
+    #
+    # channel : string : x | y
+    #
+    def get_image(self, channel):
+        self.__images[channel]
 
 
-def capture(video_capture_left, video_capture_right):
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    def init_pwm(self):
+        pass
 
-    loop = asyncio.new_event_loop()
-    left_blob, right_blob = loop.run_until_complete(
-        asyncio.gather(
-                    capture_async(video_capture_left, encode_param),
-                    capture_async(video_capture_right, encode_param)
-                )
-    )
-    loop.close()
-    return left_blob, right_blob
-#    return await asyncio.gather(
-#        capture_async(video_capture_left, encode_param),
-#        capture_async(video_capture_right, encode_param)
-#    )
+    def release_pwm(self):
+        pass
 
+    # x 축 각도
+    # z 축 각도
+    #   int : -90 ~ 90(또는 0 ~ 180)
+    def rotate_to(self, x : int, z : int):
+        pass
 
-def get_images():
-    return LEFT_IMAGE, RIGHT_IMAGE
+    # x 축 각도 증분
+    # z 축 각도 증분
+    #   int
+    def rotate(self, delta_x : int, delta_z : int):
+        pass
 
-
-def do_capture():
-    global LEFT_IMAGE, RIGHT_IMAGE, STOP_CAPTURE_EVENT
-    video_capture_left, video_capture_right = init_camera()
-    while True:
-        if STOP_CAPTURE_EVENT.is_set():
-            break
-        LEFT_IMAGE, RIGHT_IMAGE = capture(video_capture_left, video_capture_right)
-    LEFT_IMAGE, right_image = None, None
-    release_camera(video_capture_left, video_capture_right)
-
-
-def create_capture_thread():
-    global STOP_CAPTURE_EVENT
-    STOP_CAPTURE_EVENT = Event()
-    capture_tread = Thread(target=do_capture,)
-    capture_tread.start()
-    return capture_tread
-
-
-def stop_capture():
-    global STOP_CAPTURE_EVENT
-    STOP_CAPTURE_EVENT.set()
-
-def rotate_to(axis, angle):
-    pass
+if __name__ == '__main__':
+    tracker = TrackerCamera()
+    tracker.init_video()
+    tracker.start_capture()
+    tracker.wait_for_capture_thread()

@@ -12,6 +12,12 @@
 * 실행할 준비
     * 
     ```
+    # serial 라이브러리 설치
+    sudo apt-get install python3-serial
+    # Serial Console 비활성
+    systemctl stop nvgetty
+    systemctl disable nvgetty
+    udevadm trigger
     # python3(3.6, 우분투 18.04)에 꼭 필요한 것들을 먼저 설치하자
     python3 -m pip install cython
     python3 -m pip install scikit-build wheel
