@@ -86,3 +86,6 @@ def create_capture_thread():
 def stop_capture():
     global STOP_CAPTURE_EVENT
     STOP_CAPTURE_EVENT.set()
+
+def rotate_to(axis, angle):
+    pass
