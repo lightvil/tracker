@@ -14,7 +14,7 @@
     ```
     # python3(3.6, 우분투 18.04)에 꼭 필요한 것들을 먼저 설치하자
     python3 -m pip install cython
-    python3 -m pip install scikit-build whell
+    python3 -m pip install scikit-build wheel
     python3 -m pip install numpy # numpy를 설치하려면 CYthon, scikit-build 가 있어야 한다.
     python3 -m pip install opencv-python
     
