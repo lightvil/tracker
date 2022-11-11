@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import make_response
 from subprocess import call
 from flask_socketio import SocketIO, send
 import tracker
@@ -21,21 +22,25 @@ def say_hello2(name: str):  # put application's code here
     return f'Hello World, {name}!'
 
 
+def send_image(image_blob, content_type='image/jpeg'):
+    __response = make_response(image_blob)
+    __response.headers.set('ContentType', content_type)
+    return __response
+
 @app.route('/camera/images/<channel>')
 def get_image(channel: str):  # put application's code here
     left_image, right_image = tracker.get_images()
     if channel == 'left':
-        if left_image is None:
-            print('left is none')
+        if left_image is not None:
+            return send_image(left_image)
         else:
-            return 'left OK'
+            return make_response("NOT FOUND: " + channel, 404)
     elif channel == 'right':
-        if right_image is None:
-            print('right is none')
+        if right_image is not None:
+            return send_image(right_image)
         else:
-            return 'right OK'
-    else:
-        return f'NOT FOUND: {channel}!'
+            return make_response("NOT FOUND: " + channel, 404)
+    return make_response("BAD REQUEST: " + channel, 400)
     return f'Image Channel:{channel}!'
 
 

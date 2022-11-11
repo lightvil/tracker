@@ -45,7 +45,8 @@ class TrackerCamera:
 
     async def __do_capture(self):
         __result = await asyncio.gather(
-            self.__capture_video('LEFT'), self.__capture_video('RIGHT')
+            self.__capture_video(self.__sources[self.__LEFT]),
+            self.__capture_video(self.__sources[self.__RIGHT])
         )
         return __result
 
