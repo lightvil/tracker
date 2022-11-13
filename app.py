@@ -62,8 +62,12 @@ def set_coordinates(axis: str, angle: int):  # put application's code here
 if __name__ == '__main__':
     # app.run()
     tracker = tracker.TrackerCamera()
-    tracker.init_video()
+    ## start_capture()에서 모두 실행함.
+    ##tracker.init_video()
+    ##tracker.init_serial()
+
     tracker.start_capture()
     socket_io.run(app, debug=True, port=9999)
-    tracker.stop_capture_thread()
+    print("WAITING CAPTURE THREAD")
+    tracker.wait_for_capture_thread()
 

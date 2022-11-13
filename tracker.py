@@ -198,10 +198,14 @@ class TrackerCamera:
         return __result
 
     def __capture_thread_main(self):
+        print("INIT VIDEO CAPTURES")
         self.init_video()
+        print("INIT SERIAL PORT")
         self.init_serial()
+        print("GET NEW EVENT LOOP")
         __loop = asyncio.new_event_loop()
         __count = 0
+        print("ENTERING LOOP")
         while True:
             if self.__capture_thread_event is not None and self.__capture_thread_event.isSet():
                 break
@@ -215,10 +219,12 @@ class TrackerCamera:
             #  UPDATE IMAGE AND FIRE EVENT
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
-            print("ITERATION: " + str(__count))
             print(capture_result)
-            if __count > 3:
-                self.stop_capture()
+            if __count < 3:
+                print("ITERATION: " + str(__count))
+                #  멈추지 않아야...
+                # self.stop_capture()
+        print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
 
     def start_capture(self):
@@ -243,10 +249,3 @@ class TrackerCamera:
 
     def release_pwm(self):
         pass
-
-
-if __name__ == '__main__':
-    tracker = TrackerCamera()
-    tracker.init_video()
-    tracker.start_capture()
-    tracker.wait_for_capture_thread()
