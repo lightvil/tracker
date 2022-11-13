@@ -78,6 +78,8 @@ class TrackerCamera:
         )
         print('SERIAL PORT OPENED')
         print(self.__serial_port)
+        self.__write_line("x90")
+        self.__write_line("z90")
 
     def __write_line(self, __line : str):
         if self.__serial_port is not None:
@@ -100,20 +102,20 @@ class TrackerCamera:
         self.__sources[self.__LEFT] = cv2.VideoCapture(
             gstreamer_pipeline(
                 sensor_id=0,
-                # sensor_mode=3,
-                # flip_method=0,
-                # display_height=540,
-                # display_width=960,
+                sensor_mode=3,
+                flip_method=0,
+                display_height=540,
+                display_width=960,
             )
         )
         self.__sources[self.__RIGHT] = cv2.VideoCapture(
             gstreamer_pipeline(
                 sensor_id=1,
-                # sensor_mode=3,
-                # flip_method=0,
-                # framerate=30,
-                # display_height=540,
-                # display_width=960,
+                sensor_mode=3,
+                flip_method=0,
+                framerate=30,
+                display_height=540,
+                display_width=960,
             )
         )
         print(self.__sources)
