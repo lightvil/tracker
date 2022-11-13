@@ -126,7 +126,7 @@ class TrackerCamera:
 
     def process_serial_input(self):
         __result = []
-        __line = self.__serial_port.readLine()
+        __line = self.__serial_port.readline()
         __axis = None
         __angle = 0
         for c in __line:
