@@ -232,9 +232,8 @@ class TrackerCamera:
     #
     # channel : string : x | y
     #
-    def get_image(self, channel):
-        self.__images[channel]
-
+    def get_images(self):
+        return self.__images[self.__LEFT], self.__images[self.__RIGHT]
 
     def init_pwm(self):
         pass
