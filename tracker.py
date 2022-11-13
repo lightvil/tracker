@@ -185,15 +185,20 @@ class TrackerCamera:
     #
     # VIDEO CAPTURE
     #
-    async def __capture_video(self, video_capture):
-        ret, frame = video_capture.read()
+    async def __capture_left(self):
+        ret, frame = self.__sources[self.__LEFT].read()
+        result, frame = cv2.imencode('.jpg', frame, self.__ENCODE_PARAM)
+        return np.array(frame).tobytes()
+
+    async def __capture_right(self):
+        ret, frame = self.__sources[self.__RIGHT].read()
         result, frame = cv2.imencode('.jpg', frame, self.__ENCODE_PARAM)
         return np.array(frame).tobytes()
 
     async def __do_capture(self):
         __result = await asyncio.gather(
-            self.__capture_video(self.__sources[self.__LEFT]),
-            self.__capture_video(self.__sources[self.__RIGHT])
+            self.__capture_left(),
+            self.__capture_right()
         )
         return __result
 
@@ -219,9 +224,9 @@ class TrackerCamera:
             #  UPDATE IMAGE AND FIRE EVENT
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
-            print(capture_result)
             if __count < 3:
                 print("ITERATION: " + str(__count))
+                print(capture_result)
                 #  멈추지 않아야...
                 # self.stop_capture()
         print("LOOP ENDS, CLOSING LOOP")
