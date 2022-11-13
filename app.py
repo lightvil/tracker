@@ -43,7 +43,6 @@ def get_image(channel: str):  # put application's code here
         else:
             return make_response("NOT FOUND: " + channel, 404)
     return make_response("BAD REQUEST: " + channel, 400)
-    return f'Image Channel:{channel}!'
 
 @app.route('/camera/coordinates/')
 def get_coordinates():  # put application's code here

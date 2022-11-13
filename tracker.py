@@ -4,6 +4,7 @@ import numpy as np
 import serial
 import types
 from threading import Thread, Event
+from time import sleep
 
 
 def gstreamer_pipeline(
@@ -76,6 +77,7 @@ class TrackerCamera:
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
         )
+        self.__serial_port.readline()
         print('SERIAL PORT OPENED')
         print(self.__serial_port)
         self.__write_line("x90")
@@ -152,6 +154,9 @@ class TrackerCamera:
         return self.__coordinates
 
     def process_serial_input(self):
+        # 읽을 데이터가 없으면 그냥 돌아간다.
+        if self.__serial_port.in_waiting <= 0:
+            return
         __result = []
         __line = self.__serial_port.readline().decode()
         print("READ FROM SERIAL: " + __line)
@@ -229,6 +234,7 @@ class TrackerCamera:
                 print(capture_result)
                 #  멈추지 않아야...
                 # self.stop_capture()
+            sleep(10)
         print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
 
@@ -247,6 +253,8 @@ class TrackerCamera:
     # channel : string : x | y
     #
     def get_images(self):
+        print(self.__images[self.__LEFT].shape())
+        print(self.__images[self.__RIGHT].shape())
         return self.__images[self.__LEFT], self.__images[self.__RIGHT]
 
     def init_pwm(self):
