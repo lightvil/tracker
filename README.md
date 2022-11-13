@@ -30,6 +30,7 @@
     sudo apt-get install python-gevent python-greenlet
     python3 -m pip install asyncio
     python3 -m pip install dill futures greenlet gevent await
+    python3 -m pip install gevent-websocket
     python3 -m pip install cython
     python3 -m pip install scikit-build wheel
     python3 -m pip install numpy # numpy를 설치하려면 CYthon, scikit-build 가 있어야 한다.

@@ -62,7 +62,7 @@ class TrackerCamera:
             self.__LEFT: None,
             self.__RIGHT: None
         }
-        self.__angles = {
+        self.__coordinates = {
             self.__LEFT: 0,
             self.__RIGHT: 0
         }
@@ -124,6 +124,9 @@ class TrackerCamera:
         if axis == 'x' or axis == 'z':
             self.__serial_port.write(axis + str(angle))
 
+    def get_coordinates(self):
+        return self.__coordinates
+
     def process_serial_input(self):
         __result = []
         __line = self.__serial_port.readline()
@@ -151,7 +154,7 @@ class TrackerCamera:
                         __axis = c
                         __angle = 0
         for axis, angle in __result:
-            self.__angles[axis] = angle
+            self.__coordinates[axis] = angle
             # TODO FIRE ANGEL CHANGED EVENT HERE
 
     #
@@ -221,7 +224,13 @@ class TrackerCamera:
     # z 축 각도
     #   int : -90 ~ 90(또는 0 ~ 180)
     def rotate_to(self, x : int, z : int):
-        pass
+        __line = None
+        if x >= 0:
+            __line = 'x'+ str(x) + '\n'
+            self.__serial_port.write(__line.encode())
+        if z >= 0:
+            __line = 'z'+ str(x) + '\n'
+            self.__serial_port.write(__line.encode())
 
     # x 축 각도 증분
     # z 축 각도 증분

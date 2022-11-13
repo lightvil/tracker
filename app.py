@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import make_response
+from flask import jsonify
 from subprocess import call
 from flask_socketio import SocketIO, send
 import tracker
@@ -44,14 +45,16 @@ def get_image(channel: str):  # put application's code here
     return make_response("BAD REQUEST: " + channel, 400)
     return f'Image Channel:{channel}!'
 
-@app.route('/camera/axis/<axis>/')
-def get_axis(axis: str):  # put application's code here
-    angle = angles[axis]
-    return f'Axis:{axis} => {angle}!'
+@app.route('/camera/coordinates/')
+def get_coordinates():  # put application's code here
+    __coordinates = tracker.get_coordinates()
+    print("get_coordinates()")
+    return jsonify(__coordinates)
 
 
-@app.route('/camera/axis/move/<axis>/<angle>')
+@app.route('/camera/coordinates/<axis>/<angle>')
 def rotate(axis: str, angle: int):  # put application's code here
+    tracker.rotate_to(axis, angle)
     return f'Axis:{axis}, Angle::{angle}!'
 
 
