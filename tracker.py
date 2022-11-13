@@ -6,6 +6,38 @@ import types
 from threading import Thread, Event
 
 
+def gstreamer_pipeline(
+    sensor_id=0,
+    sensor_mode=3,
+    capture_width=1280,
+    capture_height=720,
+    display_width=1280,
+    display_height=720,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d sensor-mode=%d ! "
+        "video/x-raw(memory:NVMM), "
+        "width=(int)%d, height=(int)%d, "
+        "format=(string)NV12, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            sensor_mode,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+)
+
+
 class TrackerCamera:
     __ENCODE_PARAM = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
@@ -49,8 +81,28 @@ class TrackerCamera:
         self.serial_port.close()
 
     def init_video(self):
-        self.__sources[self.__LEFT] = cv2.VideoCapture(0)
-        self.__sources[self.__RIGHT] = cv2.VideoCapture(1)
+        #self.__sources[self.__LEFT] = cv2.VideoCapture(0)
+        #self.__sources[self.__RIGHT] = cv2.VideoCapture(1)
+        self.__sources[self.__LEFT] = cv2.VideoCapture(
+            gstreamer_pipeline(
+                sensor_id=0,
+                sensor_mode=3,
+                flip_method=0,
+                display_height=540,
+                display_width=960,
+            )
+        )
+        self.__sources[self.__RIGHT] = cv2.VideoCapture(
+            gstreamer_pipeline(
+                sensor_id=1,
+                sensor_mode=3,
+                flip_method=0,
+                display_height=540,
+                display_width=960,
+            )
+        )
+        print(self.__sources)
+
 
     def release_video(self):
         if self.__sources[self.__LEFT] is not None:
