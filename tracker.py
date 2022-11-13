@@ -77,7 +77,6 @@ class TrackerCamera:
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
         )
-        self.__serial_port.readline()
         print('SERIAL PORT OPENED')
         print(self.__serial_port)
         self.__write_line("x90")
@@ -208,10 +207,10 @@ class TrackerCamera:
         return __result
 
     def __capture_thread_main(self):
-        print("INIT VIDEO CAPTURES")
-        self.init_video()
         print("INIT SERIAL PORT")
         self.init_serial()
+        print("INIT VIDEO CAPTURES")
+        self.init_video()
         print("GET NEW EVENT LOOP")
         __loop = asyncio.new_event_loop()
         __count = 0
