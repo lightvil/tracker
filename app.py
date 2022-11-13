@@ -55,7 +55,7 @@ def get_coordinates():  # put application's code here
 @app.route('/camera/coordinates/<axis>/<angle>')
 def rotate(axis: str, angle: int):  # put application's code here
     tracker.rotate_to(axis, angle)
-    return f'Axis:{axis}, Angle::{angle}!'
+    return get_coordinates()
 
 
 if __name__ == '__main__':
