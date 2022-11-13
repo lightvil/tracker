@@ -168,12 +168,16 @@ class TrackerCamera:
 
     def __capture_thread_main(self):
         self.init_video()
+        self.init_serial()
         __loop = asyncio.new_event_loop()
         __count = 0
         while True:
             if self.__capture_thread_event is not None and self.__capture_thread_event.isSet():
                 break
+            # 시리얼 포트을 먼저 처리하자.
+            # 현재는 두 축의 각도만 준다.
             self.process_serial_input()
+            # Async COROUTINE __do_capture()를 호출하여 캡처
             capture_result = __loop.run_until_complete(self.__do_capture())
             __count = __count + 1
             # TODO

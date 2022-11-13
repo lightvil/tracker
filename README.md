@@ -12,8 +12,6 @@
 * 실행할 준비
     * 
     ```
-    # serial 라이브러리 설치
-    sudo apt-get install python3-serial
     # Serial Console 비활성화
     #    (/dev/ttyTHS1, PIN6: GND, PIN8:TX, PIN10 RX)
     # Arduio가 9600-N81
@@ -26,7 +24,12 @@
     #
 
     # python3(3.6, 우분투 18.04)에 꼭 필요한 것들을 먼저 설치하자
-    sudo apt-get install python3-pip python3-virtualenv 
+    # serial 라이브러리 설치
+    sudo apt-get install python3-pip python3-virtualenv
+    sudo apt-get install python3-serial
+    sudo apt-get install python-gevent python-greenlet
+    python3 -m pip install dill futures greenlet gevent await
+    python3 -m pip install asyncio
     python3 -m pip install cython
     python3 -m pip install scikit-build wheel
     python3 -m pip install numpy # numpy를 설치하려면 CYthon, scikit-build 가 있어야 한다.
