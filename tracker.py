@@ -79,6 +79,17 @@ class TrackerCamera:
         print('SERIAL PORT OPENED')
         print(self.__serial_port)
 
+    def __write_line(self, __line : str):
+        if self.__serial_port is not None:
+            if __line.endswith('\n'):
+                print("WRITING TO SERIAL: " + __line)
+                print("WRITING TO SERIAL: " + __line)
+                self.__serial_port.write(__line.encode())
+            else:
+                print("WRITING TO SERIAL: " + __line + '\n')
+                self.__serial_port.write(__line.encode())
+                self.__serial_port.write(b'\n')
+
     def release_serial(self):
         self.__serial_port.close()
         self.__serial_port = None
@@ -121,10 +132,12 @@ class TrackerCamera:
     # z 축 각도
     #   int : -90 ~ 90(또는 0 ~ 180)
     def rotate_to(self, axis : str, angle : int):
-        if axis == 'x' or axis == 'z':
-            __line = axis + str(angle) + '\n'
-            print("WRITING TO SERIAL: " + __line)
-            self.__serial_port.write(__line.encode())
+        if axis == 'c':
+            self.__write_line('x90')
+            self.__write_line('z90')
+        elif axis == 'x' or axis == 'z':
+            __line = axis + str(angle)
+            self.__write_line(__line)
 
     # x 축 각도 증분
     # z 축 각도 증분
