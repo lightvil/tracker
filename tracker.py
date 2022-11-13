@@ -100,19 +100,20 @@ class TrackerCamera:
         self.__sources[self.__LEFT] = cv2.VideoCapture(
             gstreamer_pipeline(
                 sensor_id=0,
-                sensor_mode=3,
-                flip_method=0,
-                display_height=540,
-                display_width=960,
+                # sensor_mode=3,
+                # flip_method=0,
+                # display_height=540,
+                # display_width=960,
             )
         )
         self.__sources[self.__RIGHT] = cv2.VideoCapture(
             gstreamer_pipeline(
                 sensor_id=1,
-                sensor_mode=3,
-                flip_method=0,
-                display_height=540,
-                display_width=960,
+                # sensor_mode=3,
+                # flip_method=0,
+                # framerate=30,
+                # display_height=540,
+                # display_width=960,
             )
         )
         print(self.__sources)
