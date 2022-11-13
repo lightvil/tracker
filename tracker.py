@@ -117,12 +117,19 @@ class TrackerCamera:
         self.release_video()
         self.release_serial()
 
-    #
-    #
-    #
-    def rotate_to(self, axis, angle):
+    # x 축 각도
+    # z 축 각도
+    #   int : -90 ~ 90(또는 0 ~ 180)
+    def rotate_to(self, axis : str, angle : int):
         if axis == 'x' or axis == 'z':
-            self.__serial_port.write(axis + str(angle))
+            __line = axis + str(angle) + '\n'
+            self.__serial_port.write(__line.encode())
+
+    # x 축 각도 증분
+    # z 축 각도 증분
+    #   int
+    def rotate(self, delta_x : int, delta_z : int):
+        pass
 
     def get_coordinates(self):
         return self.__coordinates
@@ -220,23 +227,6 @@ class TrackerCamera:
     def release_pwm(self):
         pass
 
-    # x 축 각도
-    # z 축 각도
-    #   int : -90 ~ 90(또는 0 ~ 180)
-    def rotate_to(self, x : int, z : int):
-        __line = None
-        if x >= 0:
-            __line = 'x'+ str(x) + '\n'
-            self.__serial_port.write(__line.encode())
-        if z >= 0:
-            __line = 'z'+ str(x) + '\n'
-            self.__serial_port.write(__line.encode())
-
-    # x 축 각도 증분
-    # z 축 각도 증분
-    #   int
-    def rotate(self, delta_x : int, delta_z : int):
-        pass
 
 if __name__ == '__main__':
     tracker = TrackerCamera()
