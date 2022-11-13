@@ -66,19 +66,22 @@ class TrackerCamera:
             self.__LEFT: 0,
             self.__RIGHT: 0
         }
-        self.serial_port = None
+        self.__serial_port = None
 
     def init_serial(self):
-        self.serial_port = serial.Serial(
+        self.__serial_port = serial.Serial(
             port="/dev/ttyTHS1",
             baudrate=9600,
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
         )
+        print('SERIAL PORT OPENED')
+        print(self.__serial_port)
 
     def release_serial(self):
-        self.serial_port.close()
+        self.__serial_port.close()
+        self.__serial_port = None
 
     def init_video(self):
         #self.__sources[self.__LEFT] = cv2.VideoCapture(0)
@@ -119,11 +122,11 @@ class TrackerCamera:
     #
     def rotate_to(self, axis, angle):
         if axis == 'x' or axis == 'z':
-            self.serial_port.write(axis + str(angle))
+            self.__serial_port.write(axis + str(angle))
 
     def process_serial_input(self):
         __result = []
-        __line = self.serial_port.readLine()
+        __line = self.__serial_port.readLine()
         __axis = None
         __angle = 0
         for c in __line:

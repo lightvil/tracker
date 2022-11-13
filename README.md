@@ -28,16 +28,18 @@
     sudo apt-get install python3-pip python3-virtualenv
     sudo apt-get install python3-serial
     sudo apt-get install python-gevent python-greenlet
-    python3 -m pip install dill futures greenlet gevent await
     python3 -m pip install asyncio
+    python3 -m pip install dill futures greenlet gevent await
     python3 -m pip install cython
     python3 -m pip install scikit-build wheel
     python3 -m pip install numpy # numpy를 설치하려면 CYthon, scikit-build 가 있어야 한다.
     python3 -m pip install opencv-python # 상당한 시간이 걸림
     python3 -m pip install opencv-contrib-python # for opencv imshow() Error
     python3 -m pip install pyserial              # for serial.Serial Class
-    
+
+    #
     # tracker를 위한 가상환경을 생성
+    #
     python3 -m venv venv
     # 위에서 생성한 가상환경으로 전환
     source venv /bin/activate
