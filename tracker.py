@@ -123,7 +123,7 @@ class TrackerCamera:
     def rotate_to(self, axis : str, angle : int):
         if axis == 'x' or axis == 'z':
             __line = axis + str(angle) + '\n'
-            print("WRITING TO SERIAL : " + __line)
+            print("WRITING TO SERIAL: " + __line)
             self.__serial_port.write(__line.encode())
 
     # x 축 각도 증분

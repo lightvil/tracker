@@ -48,12 +48,13 @@ def get_image(channel: str):  # put application's code here
 @app.route('/camera/coordinates/')
 def get_coordinates():  # put application's code here
     __coordinates = tracker.get_coordinates()
-    print("get_coordinates()")
+    print("get_coordinates():" + str(__coordinates))
     return jsonify(__coordinates)
 
 
 @app.route('/camera/coordinates/<axis>/<angle>')
-def rotate(axis: str, angle: int):  # put application's code here
+def set_coordinates(axis: str, angle: int):  # put application's code here
+    print('set_coordinates(): axis=' + axis + ", angle=" + str(angle))
     tracker.rotate_to(axis, angle)
     return get_coordinates()
 
