@@ -53,8 +53,10 @@ class TrackerCamera:
     __AXIS_Z = 'z'
 
     def __init__(self):
-        self.__capture_thread_event = None
         self.__capture_thread = None
+        self.__capture_thread_event = None
+        self.__serial_thread = None
+        self.__serial_thread_event = None
         self.__sources = {
             self.__LEFT: None,
             self.__RIGHT: None
@@ -85,7 +87,6 @@ class TrackerCamera:
     def __write_line(self, __line : str):
         if self.__serial_port is not None:
             if __line.endswith('\n'):
-                print("WRITING TO SERIAL: " + __line)
                 print("WRITING TO SERIAL: " + __line)
                 self.__serial_port.write(__line.encode())
             else:
@@ -120,7 +121,6 @@ class TrackerCamera:
             )
         )
         print(self.__sources)
-
 
     def release_video(self):
         if self.__sources[self.__LEFT] is not None:
@@ -183,9 +183,19 @@ class TrackerCamera:
                         __axis = c
                         __angle = 0
         for axis, angle in __result:
-            self.__coordinates[axis] = angle
+            self.__coordinates[axis.lower()] = angle
             # TODO FIRE ANGEL CHANGED EVENT HERE
 
+    def __serial_thread_loop(self):
+        print("ENTERING LOOP OF SERIAL THREAD")
+        while True:
+            if self.__serial_thread_event is not None and self.__serial_thread_event.isSet():
+                break
+            if self.__serial_port is None:
+                sleep(500)
+                continue
+            self.process_serial_input()
+        print("END OF SERIAL THREAD")
     #
     # VIDEO CAPTURE
     #
@@ -206,7 +216,7 @@ class TrackerCamera:
         )
         return __result
 
-    def __capture_thread_main(self):
+    def __capture_thread_loop(self):
         print("INIT SERIAL PORT")
         self.init_serial()
         print("INIT VIDEO CAPTURES")
@@ -218,9 +228,6 @@ class TrackerCamera:
         while True:
             if self.__capture_thread_event is not None and self.__capture_thread_event.isSet():
                 break
-            # 시리얼 포트을 먼저 처리하자.
-            # 현재는 두 축의 각도만 준다.
-            self.process_serial_input()
             # Async COROUTINE __do_capture()를 호출하여 캡처
             capture_result = __loop.run_until_complete(self.__do_capture())
             __count = __count + 1
@@ -230,7 +237,9 @@ class TrackerCamera:
             self.__images[self.__RIGHT] = capture_result[1]
             if __count < 3:
                 print("ITERATION: " + str(__count))
-                print(capture_result)
+                print(capture_result.shape())
+                print(capture_result[0].shape())
+                print(capture_result[1].shape())
                 #  멈추지 않아야...
                 # self.stop_capture()
             sleep(10)
@@ -239,14 +248,19 @@ class TrackerCamera:
 
     def start_capture(self):
         self.__capture_thread_event = Event()
-        self.__capture_thread = Thread(target=self.__capture_thread_main, )
+        self.__capture_thread = Thread(target=self.__capture_thread_loop, )
         self.__capture_thread.start()
+        self.__serial_thread_event = Event()
+        self.__serial_thread = Thread(target=self.__serial_thread_loop, )
+        self.__serial_thread.start()
 
     def stop_capture(self):
         self.__capture_thread_event.set()
+        self.__serial_thread_event.set()
 
     def wait_for_capture_thread(self):
         self.__capture_thread.join()
+        self.__serial_thread.join()
 
     #
     # channel : string : x | y
