@@ -54,32 +54,73 @@ void rotate_to(char axis, int angle) {
   turnLED(_OFF_);
 }
 
-int demo_count = 0;
+int demo = 0;
+int DEBUG = 0;
+int index = 0;
+char buffer[512];
+void append(char c) {
+  buffer[index] = c;
+  index++;
+  buffer[index] = 0;
+}
+void update_reset() {
+  // 버퍼에 최소한 두 글자가 있어야 한다. 그렇지 않으면 버린다.
+  // x1\r\n
+  // x100\r\n
+  // x100\r\n
+  if (index >= 2) {
+    buffer[index] = 0;
+    rotate_to(buffer[0], atoi(buffer + 1));
+  }
+  index = 0;
+  buffer[index] = 0;
+}
+
 void loop() {
-  if (Serial.available()) {
-    char axis = Serial.read();
-    // 'X | Z' : report current angle
-    //  "X100\n"의 형식
-    if (axis == 'X' || axis == 'Z') {
-      reply_angle(axis);
-    } if (axis == 'x' || axis == 'z') {
-      // not 'X|Z' lets see if  'x|z'
-      //   "x100\n" 
-      //
-      int  angle = Serial.parseInt(SKIP_WHITESPACE);
-      if (angle < 0) angle = 0;
-      else if (angle > 180) angle = 180;
-      rotate_to(axis, angle);
+  if (demo > 0) {
+    rotate_to('x', demo);     delay(100);
+    rotate_to('z', demo);     delay(100);
+    demo = (demo + 10) % 180; delay(800);
+  }
+  if (Serial.available() > 0) {
+    char c = Serial.read();
+    if (DEBUG) {
+      if (c != '\r' || c != '\n') {
+        Serial.print("DEBUG C: [");
+        Serial.print(c);
+        Serial.print("], INDEX: ");
+        Serial.print(index);
+        Serial.print(", BUFFER: ");
+        Serial.println(buffer);
+      }
+    }
+    if (c == 'D' | c == 'd') {
+      DEBUG = DEBUG == 0;
+    } else if (c == 'T' || c == 't') {
+      demo = 10;
+    } else if (c == 'C' || c == 'c') {
+      rotate_to('x', 90)
+      rotate_to('z', 90)
+    } else if (c == 'X' || c == 'Z') {
+      // 좌표 값을 조회하는 명령어
+      // 이미 버퍼에 들어있는 명령어가 있다면 처리한다.
+      update_reset();
+      reply_angle(c);
+    } else if (c == 'x' || c == 'z') {
+      // 새로운 좌표 변경 명령어가 시작되었다.
+      // 이미 버퍼에 들어있는 명령어가 있다면 처리한다.
+      update_reset();
+      append(c);
+    } else if (c >= '0' && c <= '9') {
+      // 좌표변경 명령어인 'x' 또는 'z'가 들어 있어야 한다.
+      // 그래서 index > 0 이면 버퍼에 추가
+      if (index > 0) {
+        append(c);
+      }
+    } else if (isSpace(c)) {
+      // whitespace는 추가하지는 않는다.
+      // 좌표 변경 데이터가 있으면 처리하면 된다.
+      update_reset();
     }
   }
-  //else {
-  //  if (demo_count <= 18) {
-  //      int angle = demo_count * 10;
-  //      rotate_to('x', angle);
-  //      delay(1000);
-  //      rotate_to('z', angle);
-  //      delay(1000);
-  //      demo_count++;
-  //    }
-  //}
 }
