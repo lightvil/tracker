@@ -99,8 +99,8 @@ void loop() {
     } else if (c == 'T' || c == 't') {
       demo = 10;
     } else if (c == 'C' || c == 'c') {
-      rotate_to('x', 90)
-      rotate_to('z', 90)
+      rotate_to('x', 90);
+      rotate_to('z', 90);
     } else if (c == 'X' || c == 'Z') {
       // 좌표 값을 조회하는 명령어
       // 이미 버퍼에 들어있는 명령어가 있다면 처리한다.
