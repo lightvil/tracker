@@ -59,14 +59,18 @@ def set_coordinates(axis: str, angle: int):  # put application's code here
 
 
 if __name__ == '__main__':
-    # app.run()
     tracker = tracker.TrackerCamera()
     ## start_capture()에서 모두 실행함.
     ##tracker.init_video()
     ##tracker.init_serial()
 
     tracker.start_capture()
-    socket_io.run(app, debug=True, port=9999)
+
+    # app.run()
+    # socket_io.run(app, debug=True, port=9999)
+    #
+    # openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
+    socket_io.run(app, host="0.0.0.0", debug=True, port=8443, ssl_context=('cert.pem', 'key.pem'))
     print("WAITING CAPTURE THREAD")
     tracker.wait_for_capture_thread()
 

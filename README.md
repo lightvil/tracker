@@ -25,18 +25,27 @@
 
     # python3(3.6, 우분투 18.04)에 꼭 필요한 것들을 먼저 설치하자
     # serial 라이브러리 설치
-    sudo apt-get install python3-pip python3-virtualenv
+    sudo apt-get install python3-pip
+    python3 -m pip install --upgrade pip
+  
+    sudo apt-get install python3-venv
     sudo apt-get install python3-serial
     sudo apt-get install python-gevent python-greenlet
+  
+    pythop3 -m pip install wheel
     python3 -m pip install asyncio
     python3 -m pip install dill futures greenlet gevent await
     python3 -m pip install gevent-websocket
     python3 -m pip install cython
-    python3 -m pip install scikit-build wheel
+    python3 -m pip install scikit-build
     python3 -m pip install numpy # numpy를 설치하려면 CYthon, scikit-build 가 있어야 한다.
     python3 -m pip install opencv-python # 상당한 시간이 걸림
     python3 -m pip install opencv-contrib-python # for opencv imshow() Error
     python3 -m pip install pyserial              # for serial.Serial Class
+    python3 -m pip install Flask
+    python3 -m pip install pyopenssl
+    python3 -m pip install flask-socketio
+  
 
     #
     # tracker를 위한 가상환경을 생성
@@ -71,3 +80,10 @@
     1. 1: UART TX        <--> JETSON 10(RX)
 * 스케치 : `sketch_servo.ino` 참고
 
+# Gyroscope : Arduio 33 Nano BLE
+* 스케치 파일 : `sketch_ble_gyro.ino` 참고
+
+# Flask : https
+* SSL 키 생성 
+    * Private 인증서 생성 : `openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365`
+    * `app.py`에 적용
