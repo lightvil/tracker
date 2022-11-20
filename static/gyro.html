@@ -1,0 +1,66 @@
+<html>
+<head>
+    <!
+<script>
+    function handleAngleXChanged(event) {
+        const value = event.target.value;
+        console.log('Received ' + value);
+        // TODO: Parse Heart Rate Measurement value.
+        // See https://github.com/WebBluetoothCG/demos/blob/gh-pages/heart-rate-sensor/heartRateSensor.js
+    }
+    function handleAngleZChanged(event) {
+        const value = event.target.value;
+        console.log('Received ' + value);
+        // TODO: Parse Heart Rate Measurement value.
+        // See https://github.com/WebBluetoothCG/demos/blob/gh-pages/heart-rate-sensor/heartRateSensor.js
+    }
+
+    function onDisconnected(event) {
+        const device = event.target;
+        console.log('Device ${device.name} is disconnected.');
+    }
+
+    function onLoad() {
+
+    navigator.bluetooth.requestDevice({ filters: [{ services: ['66df5109-edde-4f8a-a5e1-02e02a69cbd5'] }] })
+        .then(device => {
+            device.device.addEventListener('gattserverdisconnected', onDisconnected);
+            return device.gatt.connect()
+        })
+        .then(server => server.getPrimaryService('66df5109-edde-4f8a-a5e1-02e02a69cbd5'))
+        .then(service => {
+            //return service.getCharacteristics();
+            return [service.getCharacteristic("baad41b2-f12e-4322-9ba6-22cd9ce09832")
+                  , service.getCharacteristic("5748a25d-1834-4c68-a49b-81bf3aeb2e50")];
+        })
+        .then(characteristics => {
+            characteristics.map(characteristic => {
+                if (characteristic.uuid == "baad41b2-f12e-4322-9ba6-22cd9ce09832") {
+                    characteristic.addEventListener('characteristicvaluechanged',
+                                  handleAngleXChanged);
+                } else if (characteristic.uuid == "baad41b2-f12e-4322-9ba6-22cd9ce09832") {
+                    characteristic.addEventListener('characteristicvaluechanged',
+                                  handleAngleZChanged);
+                }
+                characteristic.startNotifications()
+            })
+        })
+        .catch(error => { console.error(error); });
+}
+
+</script>
+</head>
+<body onload='onLoad()'>
+<div>
+    <div id="div_angle_x">
+        <label id="div_angle">0</label>
+    </div>
+    <div id="div_angle_z">
+        <label id="div_angle">0</label>
+    </div>
+</div>
+<div id='div_status'>
+    <label id="status"></label>
+</div>
+</body>
+</html>

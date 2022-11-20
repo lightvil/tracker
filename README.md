@@ -4,6 +4,7 @@
 * 서버
     * Jetson Nano
     * JetPack 4.5(Ubuntu 18.04)
+    * 개발중인 Jetson Nano의 SD카드를 복사하여 사용
 * 클라이언트
     * 크롬 웹브라우저
 
@@ -87,3 +88,8 @@
 * SSL 키 생성 
     * Private 인증서 생성 : `openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365`
     * `app.py`에 적용
+* CHROME: Web Bluetooth API 켜기
+  * `chrome://flags`
+    * `Experimental Web Platform features`를 찾아 `Enanble`
+    * https://web.dev/i18n/ko/bluetooth/
+    * https://developer.chrome.com/articles/bluetooth/
