@@ -40,15 +40,6 @@ def gstreamer_pipeline(
 )
 
 
-def __get_serial_port():
-    # GPIO UART라면 "/dev/ttyTHS1"
-    for i in range(0, 5):
-        __device_name = '/dev/ttyUSB' + str(i)
-        if os.path.exists(__device_name):
-            return __device_name
-    return None
-
-
 class TrackerCamera:
     __ENCODE_PARAM = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
 
@@ -81,9 +72,17 @@ class TrackerCamera:
         }
         self.__serial_port = None
 
+    def __get_serial_port(self):
+        # GPIO UART라면 "/dev/ttyTHS1"
+        for i in range(0, 5):
+            __device_name = '/dev/ttyUSB' + str(i)
+            if os.path.exists(__device_name):
+                return __device_name
+        return None
+
     def init_serial(self):
         self.__serial_port = serial.Serial(
-            port=__get_serial_port(),
+            port=self.__get_serial_port(),
             baudrate=9600,
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
