@@ -245,11 +245,6 @@ class TrackerCamera:
             #  UPDATE IMAGE AND FIRE EVENT
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
-            if __count < 2:
-                print("ITERATION: " + str(__count))
-                print(self.__images)
-                #  멈추지 않아야...
-                # self.stop_capture()
             sleep(10)
         print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
