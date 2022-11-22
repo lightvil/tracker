@@ -118,8 +118,10 @@ class TrackerCamera:
                 sensor_id=0,
                 sensor_mode=3,
                 flip_method=0,
-                display_height=540,
-                display_width=960,
+                #display_height=540,
+                #display_width=960,
+                display_height=480,
+                display_width=640,
             )
         )
         self.__sources[self.__RIGHT] = cv2.VideoCapture(
@@ -128,8 +130,10 @@ class TrackerCamera:
                 sensor_mode=3,
                 flip_method=0,
                 framerate=30,
-                display_height=540,
-                display_width=960,
+                #display_height=540,
+                #display_width=960,
+                display_height=480,
+                display_width=640,
             )
         )
         print(self.__sources)
