@@ -251,7 +251,7 @@ class TrackerCamera:
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
             self.__captured_frames += 1
-            sleep(0.01) # 10ms(0.01초)
+            sleep(0.03) # 30ms(0.03초) 대략 초당 30프레임
         print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
 
