@@ -2,9 +2,25 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Tracker</title>
+    <script src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>
+    <script>
+        function onLoad() {
+            alert('HTML loaded');
+        }
+    </script>
 </head>
-<body>
-
+<body onload='onLoad()'>
+<div>
+    <div id="left_image">
+        <img src="{{ url_for('/camera/images/left') }}">
+    </div>
+    <div id="'right_image">
+        <img src="{{ url_for('/camera/images/right') }}">
+    </div>
+</div>
+<div id='angles'>
+    <label id="x_angle"></label> : <label  id='y_angle'></label>
+</div>
 </body>
 </html>
