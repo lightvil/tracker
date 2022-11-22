@@ -5,9 +5,87 @@
     <title>Tracker</title>
     <script src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>
     <script>
+        let interval = null;
         function onLoad() {
-            alert('HTML loaded');
+            console.log("Adding keyup Event Listener");
+            window.addEventListener('keyup', keyUp);
+            interval = setInterval(refreshImages, 100); // 일단 초당 10 프레임
+            console.log("Setting interval for refreshing images");
+            $.ajax({
+                type: "GET",
+                url: '/camera/coordinates/',
+                success: function (data, status) {
+                    console.log(JSON.stringify(data));
+                    console.log('/camera/coordinates: ' + JSON.stringify(data));
+                    updateCoordinates(data.x, data.y);
+                }
+            });
         }
+
+        function stopRefresh() {
+            console.log("Clearing interval for refreshing images");
+            clearInterval(interval);
+        }
+
+        let count = 0;
+        function refreshImages() {
+            console.log("REFRESHING IMAGES");
+            $("#left_image").attr("src", '/camera/images/left?count=' + count);
+            $("#right_image").attr("src", '/camera/images/right?count=' + count);
+            count += 1;
+        }
+
+        function updateCoordinates(x, z) {
+            console.log("updateCoordinates(" + x + ", " + z + ")");
+            angle_x = x;
+            angle_z = z;
+            $("#x_angle").text(x);
+            $("#z_angle").text(x);
+
+        }
+
+        let angle_x = 90, angle_z = 90;
+        function rotateTo(axis, angle) {
+            // /camera/coordinates/<axis>/<angle>
+		    console.log(axis + ": " + angle);
+            $.ajax({
+                type: "GET",
+                url: '/camera/coordinates/' + axis + "/" + angle,
+                success: function (data, status) {
+                    console.log('rotateTo(): result = ' + JSON.stringify(data));
+                    updateCoordinates(data.x, data.y);
+                }
+            });
+	    }
+
+	    function rotate(axis, delta) {
+            if (axis == 'x') {
+                angle_x = angle_x + delta;
+                rotateTo(axis, angle_x);
+            } else if (axis == 'z') {
+                angle_z = angle_z + delta;
+                rotateTo(axis, angle_z);
+            }
+        }
+
+    	function keyUp(e) {
+    		console.log("KEY=" + e.key);
+	    	switch(e.key) {
+		    	case 'ArrowUp':    rotate('x',   5); return;
+			    case 'ArrowDown':  rotate('x',  -5); return;
+			    case 'ArrowLeft':  rotate('z',  -5); return;
+			    case 'ArrowRight': rotate('z',   5); return;
+			    case 'PageUp':     rotate('x',  20); return;
+			    case 'PageDown':   rotate('x', -20); return;
+			    case 'Home':       rotate('z',  20); return;
+			    case 'End':        rotate('z', -20); return;
+			    case 'Enter':      rotateTo('x', 90); rotateTo('z', 90); return;
+		    }
+	    }
+
+        //
+        // BLE 관련 코드들
+        //
     </script>
 </head>
 <body onload='onLoad()'>
@@ -18,7 +96,7 @@
     <div id="'right_image" style="float: left;margin-left: 10px">
         <img src='/camera/images/right' height="480" width="640">
     </div>
-    <div style="alignment: center">[<label id="x_angle"></label> , <label  id='y_angle'></label>]</div>
+    <div style="alignment: center;float: bottom">[<label id="x_angle"></label> , <label  id='y_angle'></label>]</div>
 </div>
 </body>
 </html>
