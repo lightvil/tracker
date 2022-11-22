@@ -5,34 +5,49 @@
     <title>Tracker</title>
     <script src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>
     <script>
-        let interval = null;
         function onLoad() {
             console.log("Adding keyup Event Listener");
-            window.addEventListener('keyup', keyUp);
-            interval = setInterval(refreshImages, 100); // 일단 초당 10 프레임
-            console.log("Setting interval for refreshing images");
+            window.addEventListener('keyup', keyReleased);
+            startRefreshingImage();
+            //
+            // 최조 좌표를 구해온다.
+            //
+            requestCoordinates();
+        }
+
+        const REFRESH_INTERVAL = 100; // 일단 초당 10 프레임
+        let count = 0;
+        let interval = null;
+        function refreshImages() {
+            $("#left_image").attr("src", '/camera/images/left?count=' + count);
+            $("#right_image").attr("src", '/camera/images/right?count=' + count);
+            count += 1;
+            console.log("REFRESHING IMAGES: " + count + " times.");
+        }
+
+        function startRefreshingImage() {
+            console.log("Setting interval:" + REFRESH_INTERVAL +"ms for refreshing images");
+            interval = setInterval(refreshImages, REFRESH_INTERVAL);
+        }
+        function stopRefreshingImage() {
+            console.log("Clearing interval for refreshing images");
+            if (interval) {
+                clearInterval(interval);
+            }
+        }
+
+        let angle_x = 90, angle_z = 90;
+        function requestCoordinates() {
             $.ajax({
                 type: "GET",
                 url: '/camera/coordinates/',
-                success: function (data, status) {
+                success: function (data) {
                     console.log(JSON.stringify(data));
                     console.log('/camera/coordinates: ' + JSON.stringify(data));
                     updateCoordinates(data.x, data.z);
                 }
             });
-        }
 
-        function stopRefresh() {
-            console.log("Clearing interval for refreshing images");
-            clearInterval(interval);
-        }
-
-        let count = 0;
-        function refreshImages() {
-            console.log("REFRESHING IMAGES");
-            $("#left_image").attr("src", '/camera/images/left?count=' + count);
-            $("#right_image").attr("src", '/camera/images/right?count=' + count);
-            count += 1;
         }
 
         function updateCoordinates(x, z) {
@@ -41,10 +56,8 @@
             angle_z = z;
             $("#x_angle").text(x);
             $("#z_angle").text(x);
-
         }
 
-        let angle_x = 90, angle_z = 90;
         function rotateTo(axis, angle) {
             // /camera/coordinates/<axis>/<angle>
 		    console.log(axis + ": " + angle);
@@ -68,7 +81,7 @@
             }
         }
 
-    	function keyUp(e) {
+    	function keyReleased(e) {
     		console.log("KEY=" + e.key);
 	    	switch(e.key) {
 		    	case 'ArrowUp':    rotate('x',   5); return;
@@ -86,15 +99,79 @@
         //
         // BLE 관련 코드들
         //
+        const GYROSCOPE_SERVICE_UUID = '66df5109-edde-4f8a-a5e1-02e02a69cbd5';
+        const X_CHARACTERISTIC_UUID = '741c12b9-e13c-4992-8a5e-fce46dec0bff';
+        const Y_CHARACTERISTIC_UUID = 'baad41b2-f12e-4322-9ba6-22cd9ce09832';
+        const Z_CHARACTERISTIC_UUID = '5748a25d-1834-4c68-a49b-81bf3aeb2e50';
+
+        function handleAngleXChanged(event) {
+            const value = event.target.value;
+            console.log('NOTIFICATION x: ' + value);
+            let intValue = parseInt(value);
+            if (intValue != angle_x) {
+                rotateTo('x', intValue);
+            }
+        }
+
+        function handleAngleZChanged(event) {
+            const value = event.target.value;
+            //console.log('NOTIFICATION z: ' + value);
+            let intValue = parseInt(value);
+            if (intValue != angle_z) {
+                rotateTo('z', parseInt(value));
+            }
+        }
+
+        function onDisconnected(event) {
+            const device = event.target;
+            console.log('Device ${device.name} is disconnected.');
+            if (y_characteristic) {
+                y_characteristic.stopNotifications();
+            }
+            if (z_characteristic) {
+                y_characteristic.stopNotifications();
+            }
+        }
+
+        let gyroscopeService = null;
+        let y_characteristic = null;
+        let z_characteristic = null;
+        function startHeadTracker() {
+            navigator.bluetooth.requestDevice({filters: [{services: [GYROSCOPE_SERVICE_UUID]}]})
+                .then(device => {
+                    device.addEventListener('gattserverdisconnected', onDisconnected);
+                    return device.gatt.connect();
+                })
+                .then(server => server.getPrimaryService(GYROSCOPE_SERVICE_UUID))
+                .then(service => {
+                    //return service.getCharacteristics();
+                    gyroscopeService = service;
+                    return [service.getCharacteristic(Y_CHARACTERISTIC_UUID)
+                  ,         service.getCharacteristic(Z_CHARACTERISTIC_UUID)];
+                })
+                .then(characteristics => {
+                    characteristics.map(characteristic => {
+                        if (characteristic.uuid == Y_CHARACTERISTIC_UUID) {
+                            y_characteristic = characteristic;
+                            characteristic.addEventListener('characteristicvaluechanged', handleAngleXChanged);
+                        } else if (characteristic.uuid == Z_CHARACTERISTIC_UUID) {
+                            z_characteristic = characteristic;
+                            characteristic.addEventListener('characteristicvaluechanged', handleAngleZChanged);
+                        }
+                        characteristic.startNotifications()
+                    })
+                })
+                .catch(error => { console.error(error); });
+        }
     </script>
 </head>
 <body onload='onLoad()'>
 <div>
-    <div id="left_image" style="float: left;margin-left: 10px">
-        <img src='/camera/images/left' height="480" width="640">
+    <div style="float: left;margin-left: 10px">
+        <img id='left_image' src='/camera/images/left' height="480" width="640">
     </div>
-    <div id="'right_image" style="float: left;margin-left: 10px">
-        <img src='/camera/images/right' height="480" width="640">
+    <div style="float: left;margin-left: 10px">
+        <img id='right_image' src='/camera/images/right' height="480" width="640">
     </div>
     <div style="alignment: center;float: bottom">[<label id="x_angle"></label> , <label  id='z_angle'></label>]</div>
 </div>

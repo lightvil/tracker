@@ -12,13 +12,13 @@ app.secret_key = "tracker"
 socket_io = SocketIO(app)
 
 
-@app.route('/')
+@app.route('/camera/')
 def hello_world():  # put application's code here
     # return 'Hello World2!'
     return render_template('index.html')
 
 
-@app.route('/status')
+@app.route('/camera/status')
 def get_status():  # put application's code here
     uptime, captured_frames = tracker.get_status()
     return '{ uptime : ' + str(uptime) + ', frames : ' + str(captured_frames) + '}'
@@ -36,10 +36,10 @@ def __send_image(image_blob, content_type='image/jpeg'):
     return Response(__generator_for_image(image_blob), content_type=content_type)
 
 
-def __send_image_not_working(image_blob, content_type='image/jpeg'):
-    __response = make_response(image_blob)
-    __response.headers.set('ContentType', content_type)
-    return __response
+# def __send_image_not_working(image_blob, content_type='image/jpeg'):
+#     __response = make_response(image_blob)
+#     __response.headers.set('ContentType', content_type)
+#     return __response
 
 
 @app.route('/camera/images/<channel>')
@@ -57,13 +57,13 @@ def get_image(channel: str):  # put application's code here
 @app.route('/camera/coordinates/')
 def get_coordinates():  # put application's code here
     __coordinates = tracker.get_coordinates()
-    print("get_coordinates():" + str(__coordinates))
+    #print("get_coordinates():" + str(__coordinates))
     return jsonify(__coordinates)
 
 
 @app.route('/camera/coordinates/<axis>/<angle>')
 def set_coordinates(axis: str, angle: int):  # put application's code here
-    print('set_coordinates(): axis=' + axis + ", angle=" + str(angle))
+    #print('set_coordinates(): axis=' + axis + ", angle=" + str(angle))
     tracker.rotate_to(axis, angle)
     return get_coordinates()
 
@@ -81,9 +81,12 @@ if __name__ == '__main__':
     #
     # openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
     # socket_io.run(app, host="0.0.0.0", debug=True, port=8443, ssl_context=('cert.pem', 'key.pem'))
+
+    # ssl_context로 https 서버를 띄우는 것은 일단 보류하고 nginx를 이용하여 https 서버를 띄우도록 하자.\
+    # http는 index.html 만 파킹해 두자.
     socket_io.run(app, host="0.0.0.0",
                   # debug=True,
-                  port=8443,
+                  port=8080,
                   # ssl_context=('cert.pem', 'key.pem')
                   )
     print("WAITING CAPTURE THREAD")

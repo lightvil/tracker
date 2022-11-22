@@ -136,7 +136,7 @@ class TrackerCamera:
                 display_width=640,
             )
         )
-        print(self.__sources)
+        #print(self.__sources)
 
     def release_video(self):
         if self.__sources[self.__LEFT] is not None:
@@ -155,7 +155,7 @@ class TrackerCamera:
         if axis == 'c':
             self.__write_line('x90')
             self.__write_line('z90')
-        elif axis == __AXIS_X or axis == __AXIS_Z:
+        elif axis == self.__AXIS_X or axis == self.__AXIS_Z:
             __line = axis + str(angle)
             self.__write_line(__line)
 

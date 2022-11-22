@@ -85,11 +85,16 @@
 * 스케치 파일 : `sketch_ble_gyro.ino` 참고
 
 # Flask : https
-* SSL 키 생성 
+* SSL 키 생성 ==> 일단 보류 
     * Private 인증서 생성 : `openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365`
     * `app.py`에 적용
+* PC에서의 테스트는 마쳤지만 Jetson Nano 에서 잘되지 않아서 nginx proxy로 구성하도록 한다.
+    * 방법은 추후 업데이트
 * CHROME: Web Bluetooth API 켜기
   * `chrome://flags`
     * `Experimental Web Platform features`를 찾아 `Enanble`
     * https://web.dev/i18n/ko/bluetooth/
     * https://developer.chrome.com/articles/bluetooth/
+  * 일단 위 예제 페이지들로 테스트는 성공
+
+
