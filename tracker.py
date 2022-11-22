@@ -72,7 +72,7 @@ class TrackerCamera:
         }
         self.__coordinates = {
             self.__AXIS_X: 0,
-            self.__AXIS_Y: 0
+            self.__AXIS_Z: 0
         }
         self.__serial_port = None
 
@@ -151,7 +151,7 @@ class TrackerCamera:
         if axis == 'c':
             self.__write_line('x90')
             self.__write_line('z90')
-        elif axis == 'x' or axis == 'z':
+        elif axis == __AXIS_X or axis == __AXIS_Z:
             __line = axis + str(angle)
             self.__write_line(__line)
 
