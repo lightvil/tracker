@@ -5,9 +5,6 @@ from subprocess import call
 from flask_socketio import SocketIO, send
 import tracker
 
-
-images = {'x': None, 'y': None}
-angles = {'x': 0, 'y': 0}
 app = Flask(__name__)
 app.secret_key = "tracker"
 socket_io = SocketIO(app)
@@ -67,7 +64,11 @@ if __name__ == '__main__':
     # socket_io.run(app, debug=True, port=9999)
     #
     # openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
-    socket_io.run(app, host="0.0.0.0", debug=True, port=8443, ssl_context=('cert.pem', 'key.pem'))
+    # socket_io.run(app, host="0.0.0.0", debug=True, port=8443, ssl_context=('cert.pem', 'key.pem'))
+    socket_io.run(app, host="0.0.0.0",
+                  # debug=True,
+                  port=8443,
+                  # ssl_context=('cert.pem', 'key.pem')
+                  )
     print("WAITING CAPTURE THREAD")
     tracker.wait_for_capture_thread()
-
