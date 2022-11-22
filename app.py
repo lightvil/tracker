@@ -31,18 +31,15 @@ def __send_image(image_blob, content_type='image/jpeg'):
 
 @app.route('/camera/images/<channel>')
 def get_image(channel: str):  # put application's code here
-    left_image, right_image = tracker.get_images()
-    if channel == 'left':
-        if left_image is not None:
-            return __send_image(left_image)
-        else:
+    if channel == 'left' or channel == 'right':
+        __images = tracker.get_images()
+        __image = __images[channel]
+        if __image is None:
             return make_response("NOT FOUND: " + channel, 404)
-    elif channel == 'right':
-        if right_image is not None:
-            return __send_image(right_image)
         else:
-            return make_response("NOT FOUND: " + channel, 404)
+            return __send_image(__image)
     return make_response("BAD REQUEST: " + channel, 400)
+
 
 @app.route('/camera/coordinates/')
 def get_coordinates():  # put application's code here

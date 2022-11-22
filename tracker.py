@@ -208,6 +208,7 @@ class TrackerCamera:
     #
     # VIDEO CAPTURE
     #
+
     async def __capture_left(self):
         ret, frame = self.__sources[self.__LEFT].read()
         result, frame = cv2.imencode('.jpg', frame, self.__ENCODE_PARAM)
@@ -273,9 +274,8 @@ class TrackerCamera:
     # channel : string : x | y
     #
     def get_images(self):
-        print(self.__images[self.__LEFT].shape())
-        print(self.__images[self.__RIGHT].shape())
-        return self.__images[self.__LEFT], self.__images[self.__RIGHT]
+        # return self.__images[self.__LEFT], self.__images[self.__RIGHT]
+        return self.__images
 
     def init_pwm(self):
         pass
