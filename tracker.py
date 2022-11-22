@@ -6,6 +6,7 @@ import serial
 import types
 from threading import Thread, Event
 from time import sleep
+from time import time
 
 
 def gstreamer_pipeline(
@@ -54,6 +55,9 @@ class TrackerCamera:
     __AXIS_Z = 'z'
 
     def __init__(self):
+        self.__started_at = 0
+        self.__current_millis = 0
+        self.__captured_frames = 0
         self.__capture_thread = None
         self.__capture_thread_event = None
         self.__serial_thread = None
@@ -89,7 +93,6 @@ class TrackerCamera:
             stopbits=serial.STOPBITS_ONE,
         )
         print('SERIAL PORT OPENED')
-        print(self.__serial_port)
         self.__write_line("x90")
         self.__write_line("z90")
 
@@ -196,6 +199,8 @@ class TrackerCamera:
             # TODO FIRE ANGEL CHANGED EVENT HERE
 
     def __serial_thread_loop(self):
+        print("INIT SERIAL PORT")
+        self.init_serial()
         print("ENTERING LOOP OF SERIAL THREAD")
         while True:
             if self.__serial_thread_event is not None and self.__serial_thread_event.isSet():
@@ -227,15 +232,15 @@ class TrackerCamera:
         return __result
 
     def __capture_thread_loop(self):
-        print("INIT SERIAL PORT")
-        self.init_serial()
         print("INIT VIDEO CAPTURES")
         self.init_video()
         print("GET NEW EVENT LOOP")
         __loop = asyncio.new_event_loop()
         __count = 0
         print("ENTERING LOOP")
+        self.__started_at = time()
         while True:
+            self.__current_millis = time()
             if self.__capture_thread_event is not None and self.__capture_thread_event.isSet():
                 break
             # Async COROUTINE __do_capture()를 호출하여 캡처
@@ -245,6 +250,7 @@ class TrackerCamera:
             #  UPDATE IMAGE AND FIRE EVENT
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
+            self.__captured_frames += 1
             sleep(10)
         print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
@@ -271,6 +277,9 @@ class TrackerCamera:
     def get_images(self):
         # return self.__images[self.__LEFT], self.__images[self.__RIGHT]
         return self.__images
+
+    def get_status(self):
+        return self.__current_millis - self.__started_at, self.__captured_frames
 
     def init_pwm(self):
         pass

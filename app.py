@@ -15,6 +15,11 @@ def hello_world():  # put application's code here
     return 'Hello World2!'
 
 
+@app.route('/status')
+def say_hello2(name: str):  # put application's code here
+    uptime, captured_frames = tracker.get_status()
+    return '{ uptime : ' + str(uptime) + ', frames : ' + str(captured_frames) + '}'
+
 @app.route('/hello/<name>')
 def say_hello2(name: str):  # put application's code here
     return f'Hello World, {name}!'
