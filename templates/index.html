@@ -17,7 +17,7 @@
                 success: function (data, status) {
                     console.log(JSON.stringify(data));
                     console.log('/camera/coordinates: ' + JSON.stringify(data));
-                    updateCoordinates(data.x, data.y);
+                    updateCoordinates(data.x, data.z);
                 }
             });
         }
@@ -96,7 +96,7 @@
     <div id="'right_image" style="float: left;margin-left: 10px">
         <img src='/camera/images/right' height="480" width="640">
     </div>
-    <div style="alignment: center;float: bottom">[<label id="x_angle"></label> , <label  id='y_angle'></label>]</div>
+    <div style="alignment: center;float: bottom">[<label id="x_angle"></label> , <label  id='z_angle'></label>]</div>
 </div>
 </body>
 </html>
