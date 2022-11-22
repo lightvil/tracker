@@ -71,8 +71,8 @@ class TrackerCamera:
             self.__RIGHT: None
         }
         self.__coordinates = {
-            self.__LEFT: 0,
-            self.__RIGHT: 0
+            self.__AXIS_X: 0,
+            self.__AXIS_Y: 0
         }
         self.__serial_port = None
 
