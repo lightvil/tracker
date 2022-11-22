@@ -25,7 +25,15 @@ def say_hello2(name: str):  # put application's code here
     return f'Hello World, {name}!'
 
 
+def __generator_for_image(image_blob):
+    yield image_blob
+
+
 def __send_image(image_blob, content_type='image/jpeg'):
+    return Response(__generator_for_image(image_blob), content_type=content_type)
+
+
+def __send_image_not_working(image_blob, content_type='image/jpeg'):
     __response = make_response(image_blob)
     __response.headers.set('ContentType', content_type)
     return __response
