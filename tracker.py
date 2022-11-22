@@ -206,7 +206,7 @@ class TrackerCamera:
             if self.__serial_thread_event is not None and self.__serial_thread_event.isSet():
                 break
             if self.__serial_port is None:
-                sleep(500)
+                sleep(0.1) # 0.1초 슬립
                 continue
             self.process_serial_input()
         print("END OF SERIAL THREAD")
@@ -251,7 +251,7 @@ class TrackerCamera:
             self.__images[self.__LEFT] = capture_result[0]
             self.__images[self.__RIGHT] = capture_result[1]
             self.__captured_frames += 1
-            sleep(10)
+            sleep(0.01) # 10ms(0.01초)
         print("LOOP ENDS, CLOSING LOOP")
         __loop.close()
 
