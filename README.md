@@ -97,4 +97,21 @@
     * https://developer.chrome.com/articles/bluetooth/
   * 일단 위 예제 페이지들로 테스트는 성공
 
-
+# 서버 실행
+* Jetson Nano
+  * 계정 tracker/tracker
+  * 위치 : `~/workplace/tracker`
+  * 실행방법
+     ```
+    cd ~
+    cd workplace/tracker
+    ./run-server.sh
+    # 중지는 Ctrl-C 연
+    ```
+* 소스 업데이트 방법
+     ```
+    cd ~
+    cd workplace/tracker
+    git pull
+    ```
+* 
