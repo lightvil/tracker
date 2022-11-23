@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <title>Tracker</title>
     <script src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>
+    <!--<script src="../static/jquery-3.6.1.min.js"></script>-->
     <script>
         function onLoad() {
-            console.log("Adding keyup Event Listener");
+            //console.log("Adding keyup Event Listener");
             window.addEventListener('keyup', keyReleased);
             startRefreshingImage();
             //
@@ -15,7 +16,8 @@
             requestCoordinates();
         }
 
-        const REFRESH_INTERVAL = 100; // 일단 초당 10 프레임
+        const FRAMES_PER_SECOND = 15;                           // 초당 프레임수
+        const REFRESH_INTERVAL = ~~(1000 / FRAMES_PER_SECOND);  // HTTP GET으로 이미지를 요청하는 간격, 밀리초 단위. 이 값이 너무 짧지 않게...
         let count = 0;
         let interval = null;
         function refreshImages() {
@@ -46,7 +48,6 @@
                     updateCoordinates(data.x, data.z);
                 }
             });
-
         }
 
         function updateCoordinates(x, z) {
@@ -65,7 +66,7 @@
                 url: '/camera/coordinates/' + axis + "/" + angle,
                 success: function (data, status) {
                     console.log('rotateTo(): result = ' + JSON.stringify(data));
-                    updateCoordinates(data.x, data.y);
+                    updateCoordinates(data.x, data.z);
                 }
             });
 	    }
@@ -89,8 +90,8 @@
 			    case 'ArrowRight': rotate('z',   5); return;
 			    case 'PageUp':     rotate('x',  20); return;
 			    case 'PageDown':   rotate('x', -20); return;
-			    case 'Home':       rotate('z',  20); return;
-			    case 'End':        rotate('z', -20); return;
+			    case 'Home':       rotate('z', -20); return;
+			    case 'End':        rotate('z',  20); return;
 			    case 'Enter':      rotateTo('x', 90); rotateTo('z', 90); return;
 		    }
 	    }
@@ -165,14 +166,15 @@
     </script>
 </head>
 <body onload='onLoad()'>
-<div>
-    <div style="float: left;margin-left: 10px">
-        <img id='left_image' src='/camera/images/left' height="480" width="640">
-    </div>
-    <div style="float: left;margin-left: 10px">
-        <img id='right_image' src='/camera/images/right' height="480" width="640">
-    </div>
-    <div style="alignment: center;float: bottom">[<label id="x_angle"></label> , <label  id='z_angle'></label>]</div>
-</div>
+  <div>
+    <table>
+      <tr>
+        <td><img id='left_image' src='/camera/images/left' height="480" width="640"></td><td><img id='right_image' src='/camera/images/right' height="480" width="640"></td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">[<label id="x_angle">90</label> , <label  id='z_angle'>90</label>]</td>
+      </tr>
+    </table>
+  </div>
 </body>
 </html>
